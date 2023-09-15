@@ -63,6 +63,12 @@
         margin-bottom: 20px;
       }
 
+      .chart {
+        margin: 10px;
+        width: 500px;
+        height: 500px;
+      }
+
       h1 {
         font-size: 24px;
         margin-bottom: 10px;
@@ -80,6 +86,12 @@
         padding: 10px 0;
       }
     </style>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"
+      integrity="sha512-aoTNnqZcT8B4AmeCFmiSnDlc4Nj/KPaZyB5G7JnOnUEkdNpCZs1LCankiYi01sLTyWy+m2P+W4XM+BuQ3Q4/Dg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
   </head>
   <body>
     <!-- Skip link to the main content -->
@@ -118,11 +130,53 @@
           </section>
         </div>
       </section>
+      <h1>Chart</h1>
+      <div class="chart center">
+        <canvas id="myChart2"></canvas>
+      </div>
     </main>
 
     <!-- ARIA landmark for the footer -->
     <footer role="contentinfo" class="bottom">
       <div class="center">All rights reserved &copy; Fabio Nolasco</div>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+      let dataSource = {
+        datasets: [
+          {
+            data: [30, 350, 90],
+          },
+        ],
+        labels: ["Eat Out", "Rent", "Groceries"],
+      };
+
+      function createChart2() {
+        const ctx = document.getElementById("myChart2");
+
+        new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: dataSource.labels,
+            datasets: dataSource.datasets,
+          },
+        });
+      }
+
+      function getBudget() {
+        axios.get("/budget").then(function (response) {
+          console.log(response.data);
+          for (let i = 0; i < response.data.myBudget.length; i++) {
+            dataSource.datasets[0].data[i] = response.data.myBudget[i].budget;
+            dataSource.labels[i] = response.data.myBudget[i].title;
+          }
+          createChart2();
+        });
+      }
+
+      getBudget();
+    </script>
   </body>
 </html>
