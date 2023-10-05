@@ -92,6 +92,12 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"
+      integrity="sha512-M7nHCiNUOwFt6Us3r8alutZLm9qMt4s9951uo8jqO4UwJ1hziseL6O3ndFyigx6+LREfZqnhHxYjKRJ8ZQ69DQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
   </head>
   <body>
     <!-- Skip link to the main content -->
@@ -134,6 +140,7 @@
       <div class="chart center">
         <canvas id="myChart2"></canvas>
       </div>
+      <div id="chart-container" />
     </main>
 
     <!-- ARIA landmark for the footer -->
@@ -177,6 +184,62 @@
       }
 
       getBudget();
+    </script>
+
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+
+    <script>
+      axios
+        .get("/budget")
+        .then((response) => {
+          // Extract the myBudget array from the response data
+          const budgetData = response.data.myBudget;
+
+          // Set up dimensions
+          const width = 400;
+          const height = 400;
+          const radius = Math.min(width, height) / 2;
+
+          // Create an SVG element within the chart-container
+          const svg = d3
+            .select("#chart-container")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+          // Create a group (g) for the pie chart
+          const pieGroup = svg
+            .append("g")
+            .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+          // Define the pie layout
+          const pie = d3.pie().value((d) => d.budget);
+
+          // Define the arc generator
+          const arc = d3.arc().innerRadius(0).outerRadius(radius);
+
+          // Create the pie slices (arcs)
+          const arcs = pieGroup
+            .selectAll(".arc")
+            .data(pie(budgetData))
+            .enter()
+            .append("g")
+            .attr("class", "arc");
+
+          // Add the pie slice paths
+          arcs
+            .append("path")
+            .attr("d", arc)
+            .attr("fill", (d, i) => d3.schemeCategory10[i]); // Color scheme for the slices
+
+          // Add labels to the pie slices
+          arcs
+            .append("text")
+            .attr("transform", (d) => `translate(${arc.centroid(d)})`)
+            .attr("text-anchor", "middle")
+            .text((d) => d.data.title);
+        })
+        .catch((error) => console.error(error));
     </script>
   </body>
 </html>
